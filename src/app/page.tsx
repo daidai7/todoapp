@@ -85,15 +85,17 @@ export default function Home() {
     setTodos(newTodos)
     
     try {
-      // Find todos that have changed order and send only their IDs in the new order
+      // Find all todos that have different order than before
       const changedTodos = newTodos.filter(newTodo => {
         const oldTodo = todos.find(t => t.id === newTodo.id)
         return oldTodo && oldTodo.order !== newTodo.order
       })
       
       if (changedTodos.length > 0) {
-        // Get all todos with the same status as the changed todos and sort by new order
+        // Get the status of the changed todos (they should all have the same status)
         const status = changedTodos[0].status
+        
+        // Get all todos with the same status from the new array, sorted by order
         const statusTodos = newTodos
           .filter(todo => todo.status === status)
           .sort((a, b) => a.order - b.order)
@@ -112,6 +114,7 @@ export default function Home() {
           const updatedTodos = await response.json()
           setTodos(updatedTodos)
         } else {
+          console.error('Failed to reorder todos - reverting')
           // Revert on error
           fetchTodos()
         }
