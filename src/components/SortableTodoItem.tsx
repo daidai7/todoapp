@@ -138,11 +138,10 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-lg p-3 shadow-sm transition-all cursor-grab active:cursor-grabbing ${
+      className={`border rounded-lg p-3 shadow-sm transition-all ${
         todo.status === 'DONE' ? 'bg-gray-50 opacity-75' : importanceColors[todo.importance]
       } ${isDragging ? 'shadow-lg' : ''} hover:shadow-md`}
       {...attributes}
-      {...listeners}
     >
       <div className="flex items-start gap-3">
         {!isInKanban && (
@@ -153,7 +152,17 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
             className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
         )}
-        <div className="flex-1">
+        <div 
+          className="flex-1" 
+          {...listeners} 
+          style={{ cursor: 'grab' }}
+          onDoubleClick={(e) => {
+            e.stopPropagation()
+            if (todo.status !== 'DONE') {
+              setIsEditing(true)
+            }
+          }}
+        >
           <h3 className={`font-semibold ${
             todo.status === 'DONE' ? 'line-through text-gray-500' : 'text-gray-900'
           }`}>
@@ -189,7 +198,9 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onDelete(todo.id)
+              if (window.confirm(`「${todo.title}」を削除してもよろしいですか？`)) {
+                onDelete(todo.id)
+              }
             }}
             className="text-sm text-red-600 hover:text-red-800 transition-colors"
           >
