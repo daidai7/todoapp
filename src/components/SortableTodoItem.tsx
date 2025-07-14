@@ -11,7 +11,7 @@ interface SortableTodoItemProps {
   onUpdate: (id: string, updates: Partial<Todo>) => void
   onDelete: (id: string) => void
   isInKanban?: boolean
-  theme?: 'glass' | 'default'
+  theme?: 'glass' | 'default' | 'minimal' | 'dark' | 'card3d' | 'modern'
 }
 
 const priorityColors = {
@@ -30,6 +30,26 @@ const importanceColors = {
     LOW: 'bg-green-100',
     MEDIUM: 'bg-yellow-100',
     HIGH: 'bg-red-100'
+  },
+  minimal: {
+    LOW: 'bg-green-300',
+    MEDIUM: 'bg-yellow-300',
+    HIGH: 'bg-red-300'
+  },
+  dark: {
+    LOW: 'bg-green-600/50 border-green-500/50',
+    MEDIUM: 'bg-yellow-600/50 border-yellow-500/50',
+    HIGH: 'bg-red-600/50 border-red-500/50'
+  },
+  card3d: {
+    LOW: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200',
+    MEDIUM: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200',
+    HIGH: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+  },
+  modern: {
+    LOW: 'bg-emerald-50 border-emerald-200',
+    MEDIUM: 'bg-amber-50 border-amber-200',
+    HIGH: 'bg-rose-50 border-rose-200'
   }
 }
 
@@ -79,6 +99,52 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
     setEditPriority(todo.priority)
     setEditImportance(todo.importance)
     setIsEditing(false)
+  }
+  
+  const getCardClass = () => {
+    const baseClass = 'border p-4 transition-all duration-300'
+    const importanceClass = importanceColors[theme][todo.importance]
+    const dragClass = isDragging ? 'shadow-2xl scale-105' : ''
+    const hoverClass = 'hover:shadow-xl hover:scale-[1.02]'
+    
+    switch (theme) {
+      case 'glass':
+        return `${baseClass} rounded-xl shadow-lg backdrop-blur-sm ${
+          todo.status === 'DONE' 
+            ? 'bg-gray-50/40 opacity-75 border-gray-300/50' 
+            : `${importanceClass} bg-white/40 border-white/40`
+        } ${dragClass} ${hoverClass}`
+      case 'dark':
+        return `${baseClass} rounded-xl shadow-lg backdrop-blur-sm ${
+          todo.status === 'DONE' 
+            ? 'bg-gray-700/40 opacity-75 border-gray-600/50' 
+            : `${importanceClass} bg-gray-800/60 border-gray-600/50`
+        } ${dragClass} ${hoverClass}`
+      case 'minimal':
+        return `${baseClass} rounded-lg border-2 ${
+          todo.status === 'DONE' 
+            ? 'bg-gray-200 opacity-75 border-gray-400' 
+            : `${importanceClass} border-gray-900`
+        } ${dragClass} ${hoverClass}`
+      case 'card3d':
+        return `${baseClass} rounded-2xl shadow-2xl ${
+          todo.status === 'DONE' 
+            ? 'bg-gradient-to-br from-gray-100 to-gray-200 opacity-75 border-gray-300' 
+            : `${importanceClass}`
+        } ${dragClass} hover:shadow-3xl hover:translate-y-[-6px] transform transition-all duration-300`
+      case 'modern':
+        return `${baseClass} rounded-2xl shadow-xl backdrop-blur-sm ${
+          todo.status === 'DONE' 
+            ? 'bg-slate-100/40 opacity-75 border-slate-300/50' 
+            : `${importanceClass}`
+        } ${dragClass} ${hoverClass}`
+      default:
+        return `${baseClass} rounded-xl shadow-lg ${
+          todo.status === 'DONE' 
+            ? 'bg-gray-50 opacity-75 border-gray-300' 
+            : `${importanceClass}`
+        } ${dragClass} ${hoverClass}`
+    }
   }
 
   if (isEditing) {
@@ -146,17 +212,7 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-xl p-4 shadow-lg transition-all duration-300 ${
-        theme === 'glass' ? 'backdrop-blur-sm' : ''
-      } ${
-        todo.status === 'DONE' 
-          ? theme === 'glass' 
-            ? 'bg-gray-50/40 opacity-75 border-gray-300/50' 
-            : 'bg-gray-50 opacity-75 border-gray-300'
-          : `${importanceColors[theme][todo.importance]} ${theme === 'glass' ? 'bg-white/40' : 'bg-white'}`
-      } ${isDragging ? 'shadow-2xl scale-105' : ''} hover:shadow-xl hover:scale-[1.02] ${
-        theme === 'glass' ? 'border-white/40' : 'border-gray-200'
-      }`}
+      className={getCardClass()}
       {...attributes}
     >
       <div className="flex items-start gap-3">
@@ -180,22 +236,38 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
           }}
         >
           <h3 className={`font-semibold ${
-            todo.status === 'DONE' ? 'line-through text-gray-500' : 'text-gray-900'
+            todo.status === 'DONE' 
+              ? 'line-through text-gray-500' 
+              : theme === 'dark' 
+                ? 'text-white' 
+                : 'text-gray-900'
           }`}>
             {todo.title}
           </h3>
           {todo.description && (
             <p className={`mt-1 text-sm ${
-              todo.status === 'DONE' ? 'line-through text-gray-400' : 'text-gray-600'
+              todo.status === 'DONE' 
+                ? 'line-through text-gray-400' 
+                : theme === 'dark' 
+                  ? 'text-gray-300' 
+                  : 'text-gray-600'
             }`}>
               {todo.description}
             </p>
           )}
           <div className="flex gap-2 mt-2">
-            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.priority]} bg-white/70 backdrop-blur-sm border border-white/30`}>
+            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.priority]} ${
+              theme === 'dark' 
+                ? 'bg-gray-800/80 backdrop-blur-sm border border-gray-600/50' 
+                : 'bg-white/70 backdrop-blur-sm border border-white/30'
+            }`}>
               優先度: {todo.priority === 'LOW' ? '低' : todo.priority === 'MEDIUM' ? '中' : '高'}
             </span>
-            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.importance]} bg-white/70 backdrop-blur-sm border border-white/30`}>
+            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.importance]} ${
+              theme === 'dark' 
+                ? 'bg-gray-800/80 backdrop-blur-sm border border-gray-600/50' 
+                : 'bg-white/70 backdrop-blur-sm border border-white/30'
+            }`}>
               重要度: {todo.importance === 'LOW' ? '低' : todo.importance === 'MEDIUM' ? '中' : '高'}
             </span>
           </div>
@@ -206,7 +278,11 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
               e.stopPropagation()
               setIsEditing(true)
             }}
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm border border-white/30 hover:bg-white/70"
+            className={`text-sm transition-colors px-2 py-1 rounded-lg backdrop-blur-sm ${
+              theme === 'dark' 
+                ? 'text-blue-400 hover:text-blue-300 bg-gray-800/60 border border-gray-600/50 hover:bg-gray-700/70' 
+                : 'text-blue-600 hover:text-blue-800 bg-white/50 border border-white/30 hover:bg-white/70'
+            }`}
             disabled={todo.status === 'DONE'}
           >
             編集
@@ -218,7 +294,11 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
                 onDelete(todo.id)
               }
             }}
-            className="text-sm text-red-600 hover:text-red-800 transition-colors px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm border border-white/30 hover:bg-white/70"
+            className={`text-sm transition-colors px-2 py-1 rounded-lg backdrop-blur-sm ${
+              theme === 'dark' 
+                ? 'text-red-400 hover:text-red-300 bg-gray-800/60 border border-gray-600/50 hover:bg-gray-700/70' 
+                : 'text-red-600 hover:text-red-800 bg-white/50 border border-white/30 hover:bg-white/70'
+            }`}
           >
             削除
           </button>

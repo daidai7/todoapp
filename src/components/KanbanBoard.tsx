@@ -13,7 +13,7 @@ interface KanbanBoardProps {
   onDelete: (id: string) => void
   onStatusChange: (todoId: string, newStatus: Status, targetPosition?: number) => void
   onReorder: (newTodos: Todo[]) => void
-  theme: 'glass' | 'default'
+  theme: 'glass' | 'default' | 'minimal' | 'dark' | 'card3d' | 'modern'
 }
 
 const statusConfig = {
