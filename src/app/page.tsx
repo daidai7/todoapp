@@ -9,7 +9,7 @@ import { Status } from '@prisma/client'
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [loading, setLoading] = useState(true)
-  const [theme, setTheme] = useState<'glass' | 'default'>('glass')
+  const [theme, setTheme] = useState<'glass' | 'default' | 'minimal' | 'dark' | 'card3d' | 'modern'>('default')
 
   useEffect(() => {
     fetchTodos()
@@ -154,22 +154,107 @@ export default function Home() {
     )
   }
 
-  const isGlassTheme = theme === 'glass'
+  const getBackgroundClass = () => {
+    switch (theme) {
+      case 'glass':
+        return 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500'
+      case 'dark':
+        return 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700'
+      case 'minimal':
+        return 'bg-white'
+      case 'card3d':
+        return 'bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200'
+      case 'modern':
+        return 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+      default:
+        return 'bg-gray-50'
+    }
+  }
+  
+  const getHeaderClass = () => {
+    switch (theme) {
+      case 'glass':
+        return 'bg-white/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/30'
+      case 'dark':
+        return 'bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-600/50'
+      case 'minimal':
+        return 'bg-white rounded-lg border-2 border-gray-300'
+      case 'card3d':
+        return 'bg-white rounded-2xl shadow-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50'
+      case 'modern':
+        return 'bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200'
+      default:
+        return 'bg-white rounded-lg shadow-sm'
+    }
+  }
+  
+  const getHeaderTextClass = () => {
+    switch (theme) {
+      case 'glass':
+        return 'text-white drop-shadow-lg'
+      case 'dark':
+        return 'text-white drop-shadow-lg'
+      case 'minimal':
+        return 'text-gray-900'
+      case 'card3d':
+        return 'text-gray-900'
+      case 'modern':
+        return 'text-slate-800'
+      default:
+        return 'text-gray-900'
+    }
+  }
+  
+  const getHeaderSubTextClass = () => {
+    switch (theme) {
+      case 'glass':
+        return 'text-white/80 drop-shadow'
+      case 'dark':
+        return 'text-gray-300'
+      case 'minimal':
+        return 'text-gray-600'
+      case 'card3d':
+        return 'text-gray-600'
+      case 'modern':
+        return 'text-slate-600'
+      default:
+        return 'text-gray-600'
+    }
+  }
   
   return (
-    <div className={`min-h-screen ${isGlassTheme ? 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500' : 'bg-gray-50'} relative`}>
-      {isGlassTheme && <div className="absolute inset-0 bg-black/20"></div>}
+    <div className={`min-h-screen ${getBackgroundClass()} relative`}>
+      {(theme === 'glass' || theme === 'dark') && <div className="absolute inset-0 bg-black/20"></div>}
       <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         {/* Header with inline form */}
-        <div className={`flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6 ${isGlassTheme ? 'bg-white/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/30' : 'bg-white rounded-lg shadow-sm'} p-6 gap-6`}>
+        <div className={`flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6 ${getHeaderClass()} p-6 gap-6`}>
           <div className="flex items-center space-x-6 lg:w-1/3">
             <div>
-              <h1 className={`text-2xl font-bold ${isGlassTheme ? 'text-white drop-shadow-lg' : 'text-gray-900'}`}>
+              <h1 className={`text-2xl font-bold ${getHeaderTextClass()}`}>
                 Todo Kanban Board
               </h1>
-              <p className={`text-sm ${isGlassTheme ? 'text-white/80 drop-shadow' : 'text-gray-600'}`}>
+              <p className={`text-sm ${getHeaderSubTextClass()}`}>
                 タスクをドラッグ&ドロップして進捗を管理
               </p>
+              {/* Theme Selector */}
+              <div className="mt-3">
+                <select
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value as 'glass' | 'default' | 'minimal' | 'dark' | 'card3d' | 'modern')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm ${
+                    theme === 'glass' || theme === 'dark'
+                      ? 'bg-white/20 backdrop-blur-sm border border-white/30 text-white' 
+                      : 'bg-white border border-gray-300 text-gray-800'
+                  }`}
+                >
+                  <option value="default" className="text-black">デフォルト</option>
+                  <option value="glass" className="text-black">ガラスモーフィズム</option>
+                  <option value="minimal" className="text-black">ミニマルフラット</option>
+                  <option value="dark" className="text-black">ダークモード</option>
+                  <option value="card3d" className="text-black">3Dカード</option>
+                  <option value="modern" className="text-black">モダンカード</option>
+                </select>
+              </div>
             </div>
           </div>
           
@@ -179,7 +264,7 @@ export default function Home() {
         </div>
 
         {/* Kanban Board */}
-        <div className="h-[calc(100vh-14rem)]">
+        <div className="h-[calc(100vh-16rem)] max-h-[600px]">
           {todos.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
               <div className="text-4xl mb-4">🎯</div>
@@ -200,21 +285,6 @@ export default function Home() {
           )}
         </div>
         
-        {/* Theme Selector */}
-        <div className="fixed bottom-4 left-4">
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value as 'glass' | 'default')}
-            className={`px-3 py-2 rounded-lg text-sm font-medium ${
-              isGlassTheme 
-                ? 'bg-white/20 backdrop-blur-sm border border-white/30 text-white' 
-                : 'bg-white border border-gray-300 text-gray-800'
-            } shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400`}
-          >
-            <option value="glass" className="text-black">ガラスモーフィズム</option>
-            <option value="default" className="text-black">デフォルト</option>
-          </select>
-        </div>
       </div>
     </div>
   )
