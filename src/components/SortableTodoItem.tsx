@@ -147,25 +147,113 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
     }
   }
 
+  const getEditContainerClass = () => {
+    const baseClass = 'border rounded-xl p-4 shadow-lg'
+    
+    switch (theme) {
+      case 'glass':
+        return `${baseClass} bg-white/40 backdrop-blur-sm border-white/40`
+      case 'dark':
+        return `${baseClass} bg-gray-800/80 backdrop-blur-sm border-gray-600/50`
+      case 'minimal':
+        return `${baseClass} bg-white border-2 border-gray-300`
+      case 'card3d':
+        return `${baseClass} bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-2xl`
+      case 'modern':
+        return `${baseClass} bg-white/90 backdrop-blur-sm border-slate-200`
+      default:
+        return `${baseClass} bg-white border-gray-200`
+    }
+  }
+  
+  const getEditInputClass = () => {
+    const baseClass = 'w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
+    
+    switch (theme) {
+      case 'glass':
+        return `${baseClass} border-white/30 bg-white/20 backdrop-blur-sm text-gray-800 placeholder-gray-600`
+      case 'dark':
+        return `${baseClass} border-gray-600/50 bg-gray-700/50 backdrop-blur-sm text-white placeholder-gray-400`
+      case 'minimal':
+        return `${baseClass} border-2 border-gray-900 bg-white text-gray-900 placeholder-gray-500`
+      case 'card3d':
+        return `${baseClass} border-gray-300 bg-gradient-to-br from-white to-gray-50 text-gray-900 placeholder-gray-500 shadow-inner`
+      case 'modern':
+        return `${baseClass} border-slate-300 bg-white/80 text-slate-800 placeholder-slate-500`
+      default:
+        return `${baseClass} border-gray-300 bg-white text-gray-800 placeholder-gray-500`
+    }
+  }
+  
+  const getEditSelectClass = () => {
+    const baseClass = 'p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
+    
+    switch (theme) {
+      case 'glass':
+        return `${baseClass} border-white/30 bg-white/20 backdrop-blur-sm text-gray-800`
+      case 'dark':
+        return `${baseClass} border-gray-600/50 bg-gray-700/50 backdrop-blur-sm text-white`
+      case 'minimal':
+        return `${baseClass} border-2 border-gray-900 bg-white text-gray-900`
+      case 'card3d':
+        return `${baseClass} border-gray-300 bg-gradient-to-br from-white to-gray-50 text-gray-900 shadow-inner`
+      case 'modern':
+        return `${baseClass} border-slate-300 bg-white/80 text-slate-800`
+      default:
+        return `${baseClass} border-gray-300 bg-white text-gray-800`
+    }
+  }
+  
+  const getEditButtonClass = (variant: 'save' | 'cancel') => {
+    const baseClass = 'px-4 py-2 rounded-lg transition-all duration-300'
+    
+    switch (theme) {
+      case 'glass':
+        return variant === 'save' 
+          ? `${baseClass} bg-white/30 backdrop-blur-sm border border-white/30 text-gray-800 hover:bg-white/50`
+          : `${baseClass} bg-white/20 backdrop-blur-sm border border-white/30 text-gray-800 hover:bg-white/40`
+      case 'dark':
+        return variant === 'save' 
+          ? `${baseClass} bg-blue-600 text-white hover:bg-blue-700 border border-blue-500`
+          : `${baseClass} bg-gray-700 text-white hover:bg-gray-600 border border-gray-600`
+      case 'minimal':
+        return variant === 'save' 
+          ? `${baseClass} bg-gray-900 text-white hover:bg-gray-800 border-2 border-gray-900`
+          : `${baseClass} bg-white text-gray-900 hover:bg-gray-100 border-2 border-gray-300`
+      case 'card3d':
+        return variant === 'save' 
+          ? `${baseClass} bg-gradient-to-br from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl border border-blue-500`
+          : `${baseClass} bg-gradient-to-br from-gray-200 to-gray-300 text-gray-800 hover:from-gray-300 hover:to-gray-400 shadow-lg hover:shadow-xl border border-gray-300`
+      case 'modern':
+        return variant === 'save' 
+          ? `${baseClass} bg-slate-700 text-white hover:bg-slate-800 border border-slate-600`
+          : `${baseClass} bg-white text-slate-800 hover:bg-slate-50 border border-slate-300`
+      default:
+        return variant === 'save' 
+          ? `${baseClass} bg-blue-600 text-white hover:bg-blue-700 border border-blue-500`
+          : `${baseClass} bg-gray-200 text-gray-800 hover:bg-gray-300 border border-gray-300`
+    }
+  }
+
   if (isEditing) {
     return (
       <div
         ref={setNodeRef}
         style={style}
-        className="border rounded-xl p-4 bg-white/40 backdrop-blur-sm shadow-lg border-white/40"
+        className={getEditContainerClass()}
       >
         <div className="space-y-3">
           <input
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder-gray-600"
+            className={getEditInputClass()}
             placeholder="タイトル"
           />
           <textarea
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
-            className="w-full p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder-gray-600"
+            className={getEditInputClass()}
             placeholder="概要"
             rows={2}
           />
@@ -173,7 +261,7 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
             <select
               value={editPriority}
               onChange={(e) => setEditPriority(e.target.value as Priority)}
-              className="p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+              className={getEditSelectClass()}
             >
               <option value="LOW" className="text-black">優先度: 低</option>
               <option value="MEDIUM" className="text-black">優先度: 中</option>
@@ -182,7 +270,7 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
             <select
               value={editImportance}
               onChange={(e) => setEditImportance(e.target.value as Importance)}
-              className="p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+              className={getEditSelectClass()}
             >
               <option value="LOW" className="text-black">重要度: 低</option>
               <option value="MEDIUM" className="text-black">重要度: 中</option>
@@ -192,13 +280,13 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
           <div className="flex gap-2">
             <button
               onClick={handleSaveEdit}
-              className="px-4 py-2 bg-white/30 backdrop-blur-sm border border-white/30 text-gray-800 rounded-lg hover:bg-white/50 transition-all duration-300"
+              className={getEditButtonClass('save')}
             >
               保存
             </button>
             <button
               onClick={handleCancelEdit}
-              className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-800 rounded-lg hover:bg-white/40 transition-all duration-300"
+              className={getEditButtonClass('cancel')}
             >
               キャンセル
             </button>
