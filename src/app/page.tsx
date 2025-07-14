@@ -9,6 +9,7 @@ import { Status } from '@prisma/client'
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [loading, setLoading] = useState(true)
+  const [theme, setTheme] = useState<'glass' | 'default'>('glass')
 
   useEffect(() => {
     fetchTodos()
@@ -147,30 +148,33 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg">読み込み中...</div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center">
+        <div className="text-lg text-white drop-shadow-lg">読み込み中...</div>
       </div>
     )
   }
 
+  const isGlassTheme = theme === 'glass'
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className={`min-h-screen ${isGlassTheme ? 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500' : 'bg-gray-50'} relative`}>
+      {isGlassTheme && <div className="absolute inset-0 bg-black/20"></div>}
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         {/* Header with inline form */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6 bg-white rounded-lg shadow-sm p-6 gap-6">
+        <div className={`flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6 ${isGlassTheme ? 'bg-white/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/30' : 'bg-white rounded-lg shadow-sm'} p-6 gap-6`}>
           <div className="flex items-center space-x-6 lg:w-1/3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className={`text-2xl font-bold ${isGlassTheme ? 'text-white drop-shadow-lg' : 'text-gray-900'}`}>
                 Todo Kanban Board
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className={`text-sm ${isGlassTheme ? 'text-white/80 drop-shadow' : 'text-gray-600'}`}>
                 タスクをドラッグ&ドロップして進捗を管理
               </p>
             </div>
           </div>
           
           <div className="lg:w-2/3">
-            <TodoForm onSubmit={createTodo} />
+            <TodoForm onSubmit={createTodo} theme={theme} />
           </div>
         </div>
 
@@ -191,8 +195,25 @@ export default function Home() {
               onDelete={deleteTodo}
               onStatusChange={changeStatus}
               onReorder={reorderTodos}
+              theme={theme}
             />
           )}
+        </div>
+        
+        {/* Theme Selector */}
+        <div className="fixed bottom-4 left-4">
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value as 'glass' | 'default')}
+            className={`px-3 py-2 rounded-lg text-sm font-medium ${
+              isGlassTheme 
+                ? 'bg-white/20 backdrop-blur-sm border border-white/30 text-white' 
+                : 'bg-white border border-gray-300 text-gray-800'
+            } shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400`}
+          >
+            <option value="glass" className="text-black">ガラスモーフィズム</option>
+            <option value="default" className="text-black">デフォルト</option>
+          </select>
         </div>
       </div>
     </div>

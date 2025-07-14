@@ -11,6 +11,7 @@ interface SortableTodoItemProps {
   onUpdate: (id: string, updates: Partial<Todo>) => void
   onDelete: (id: string) => void
   isInKanban?: boolean
+  theme?: 'glass' | 'default'
 }
 
 const priorityColors = {
@@ -20,12 +21,19 @@ const priorityColors = {
 }
 
 const importanceColors = {
-  LOW: 'bg-green-100',
-  MEDIUM: 'bg-yellow-100',
-  HIGH: 'bg-red-100'
+  glass: {
+    LOW: 'bg-green-100/30 border-green-300/50',
+    MEDIUM: 'bg-yellow-100/30 border-yellow-300/50',
+    HIGH: 'bg-red-100/30 border-red-300/50'
+  },
+  default: {
+    LOW: 'bg-green-100',
+    MEDIUM: 'bg-yellow-100',
+    HIGH: 'bg-red-100'
+  }
 }
 
-export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban = false }: SortableTodoItemProps) {
+export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban = false, theme = 'glass' }: SortableTodoItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
   const [editDescription, setEditDescription] = useState(todo.description)
@@ -78,20 +86,20 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
       <div
         ref={setNodeRef}
         style={style}
-        className="border rounded-lg p-4 bg-white shadow-sm"
+        className="border rounded-xl p-4 bg-white/40 backdrop-blur-sm shadow-lg border-white/40"
       >
         <div className="space-y-3">
           <input
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder-gray-600"
             placeholder="タイトル"
           />
           <textarea
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder-gray-600"
             placeholder="概要"
             rows={2}
           />
@@ -99,32 +107,32 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
             <select
               value={editPriority}
               onChange={(e) => setEditPriority(e.target.value as Priority)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
             >
-              <option value="LOW">優先度: 低</option>
-              <option value="MEDIUM">優先度: 中</option>
-              <option value="HIGH">優先度: 高</option>
+              <option value="LOW" className="text-black">優先度: 低</option>
+              <option value="MEDIUM" className="text-black">優先度: 中</option>
+              <option value="HIGH" className="text-black">優先度: 高</option>
             </select>
             <select
               value={editImportance}
               onChange={(e) => setEditImportance(e.target.value as Importance)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 border border-white/30 rounded-lg bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
             >
-              <option value="LOW">重要度: 低</option>
-              <option value="MEDIUM">重要度: 中</option>
-              <option value="HIGH">重要度: 高</option>
+              <option value="LOW" className="text-black">重要度: 低</option>
+              <option value="MEDIUM" className="text-black">重要度: 中</option>
+              <option value="HIGH" className="text-black">重要度: 高</option>
             </select>
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleSaveEdit}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-white/30 backdrop-blur-sm border border-white/30 text-gray-800 rounded-lg hover:bg-white/50 transition-all duration-300"
             >
               保存
             </button>
             <button
               onClick={handleCancelEdit}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-800 rounded-lg hover:bg-white/40 transition-all duration-300"
             >
               キャンセル
             </button>
@@ -138,9 +146,17 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-lg p-3 shadow-sm transition-all ${
-        todo.status === 'DONE' ? 'bg-gray-50 opacity-75' : importanceColors[todo.importance]
-      } ${isDragging ? 'shadow-lg' : ''} hover:shadow-md`}
+      className={`border rounded-xl p-4 shadow-lg transition-all duration-300 ${
+        theme === 'glass' ? 'backdrop-blur-sm' : ''
+      } ${
+        todo.status === 'DONE' 
+          ? theme === 'glass' 
+            ? 'bg-gray-50/40 opacity-75 border-gray-300/50' 
+            : 'bg-gray-50 opacity-75 border-gray-300'
+          : `${importanceColors[theme][todo.importance]} ${theme === 'glass' ? 'bg-white/40' : 'bg-white'}`
+      } ${isDragging ? 'shadow-2xl scale-105' : ''} hover:shadow-xl hover:scale-[1.02] ${
+        theme === 'glass' ? 'border-white/40' : 'border-gray-200'
+      }`}
       {...attributes}
     >
       <div className="flex items-start gap-3">
@@ -176,10 +192,10 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
             </p>
           )}
           <div className="flex gap-2 mt-2">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${priorityColors[todo.priority]} bg-white`}>
+            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.priority]} bg-white/70 backdrop-blur-sm border border-white/30`}>
               優先度: {todo.priority === 'LOW' ? '低' : todo.priority === 'MEDIUM' ? '中' : '高'}
             </span>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${priorityColors[todo.importance]} bg-white`}>
+            <span className={`text-xs font-medium px-3 py-1 rounded-full ${priorityColors[todo.importance]} bg-white/70 backdrop-blur-sm border border-white/30`}>
               重要度: {todo.importance === 'LOW' ? '低' : todo.importance === 'MEDIUM' ? '中' : '高'}
             </span>
           </div>
@@ -190,7 +206,7 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
               e.stopPropagation()
               setIsEditing(true)
             }}
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            className="text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm border border-white/30 hover:bg-white/70"
             disabled={todo.status === 'DONE'}
           >
             編集
@@ -202,7 +218,7 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
                 onDelete(todo.id)
               }
             }}
-            className="text-sm text-red-600 hover:text-red-800 transition-colors"
+            className="text-sm text-red-600 hover:text-red-800 transition-colors px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm border border-white/30 hover:bg-white/70"
           >
             削除
           </button>

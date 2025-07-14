@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   onUpdate: (id: string, updates: Partial<Todo>) => void
   onDelete: (id: string) => void
   isDraggedOver: boolean
+  theme: 'glass' | 'default'
 }
 
 export default function KanbanColumn({
@@ -23,23 +24,36 @@ export default function KanbanColumn({
   todos,
   onUpdate,
   onDelete,
-  isDraggedOver
+  isDraggedOver,
+  theme
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${status}`,
   })
 
+  const isGlassTheme = theme === 'glass'
+  
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col h-full rounded-lg border-2 ${color} ${
-        isOver || isDraggedOver ? 'border-blue-400 bg-blue-50' : ''
-      } transition-colors shadow-sm bg-white`}
+      className={`flex flex-col h-full rounded-2xl border ${color} ${
+        isOver || isDraggedOver ? 'border-blue-400/60 bg-blue-50/30' : isGlassTheme ? 'border-white/30' : 'border-gray-200'
+      } transition-all duration-300 shadow-xl ${
+        isGlassTheme ? 'bg-white/20 backdrop-blur-md' : 'bg-white'
+      }`}
     >
-      <div className="p-3 border-b bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
-        <h3 className="font-semibold text-gray-800 flex items-center justify-between">
+      <div className={`p-4 border-b rounded-t-2xl ${
+        isGlassTheme ? 'border-white/20 bg-white/10 backdrop-blur-sm' : 'border-gray-200 bg-gray-50'
+      }`}>
+        <h3 className={`font-semibold flex items-center justify-between ${
+          isGlassTheme ? 'text-white drop-shadow-lg' : 'text-gray-800'
+        }`}>
           {title}
-          <span className="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
+          <span className={`text-xs font-normal px-3 py-1 rounded-full ${
+            isGlassTheme 
+              ? 'text-white/80 bg-white/20 backdrop-blur-sm border border-white/30' 
+              : 'text-gray-500 bg-gray-200 border border-gray-300'
+          }`}>
             {todos.length}
           </span>
         </h3>
@@ -55,19 +69,24 @@ export default function KanbanColumn({
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 isInKanban={true}
+                theme={theme}
               />
             ))}
           </div>
         </SortableContext>
         
         {todos.length === 0 && (
-          <div className="text-center py-8 text-gray-400">
+          <div className={`text-center py-8 ${
+            isGlassTheme ? 'text-white/60' : 'text-gray-400'
+          }`}>
             <div className="text-3xl mb-2">
               {status === 'TODO' && '📝'}
               {status === 'DOING' && '⚡'}
               {status === 'DONE' && '✅'}
             </div>
-            <p className="text-sm">
+            <p className={`text-sm ${
+              isGlassTheme ? 'drop-shadow' : ''
+            }`}>
               {status === 'TODO' && 'タスクをここにドロップ'}
               {status === 'DOING' && '進行中のタスクなし'}
               {status === 'DONE' && '完了したタスクなし'}
