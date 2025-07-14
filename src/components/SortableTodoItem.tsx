@@ -139,8 +139,8 @@ export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban 
       ref={setNodeRef}
       style={style}
       className={`border rounded-lg p-3 shadow-sm transition-all cursor-grab active:cursor-grabbing ${
-        todo.status === 'DONE' ? 'bg-gray-50 opacity-75' : 'bg-white'
-      } ${importanceColors[todo.importance]} ${isDragging ? 'shadow-lg' : ''} hover:shadow-md`}
+        todo.status === 'DONE' ? 'bg-gray-50 opacity-75' : importanceColors[todo.importance]
+      } ${isDragging ? 'shadow-lg' : ''} hover:shadow-md`}
       {...attributes}
       {...listeners}
     >

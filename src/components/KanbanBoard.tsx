@@ -69,8 +69,23 @@ export default function KanbanBoard({
     const activeId = active.id as string
     const overId = over.id as string
 
+    // If dropping on a column (status change)
+    if (overId.startsWith('column-')) {
+      const newStatus = overId.replace('column-', '') as Status
+      const activeTodo = todos.find(todo => todo.id === activeId)
+      
+      if (activeTodo && activeTodo.status !== newStatus) {
+        // Calculate target position (end of the column)
+        const todosInTarget = todos.filter(todo => todo.status === newStatus)
+        const targetPosition = todosInTarget.length
+        
+        onStatusChange(activeId, newStatus, targetPosition)
+      }
+      return
+    }
+
     // If dropping on another todo (reordering within same status)
-    if (activeId !== overId && !overId.startsWith('column-')) {
+    if (activeId !== overId) {
       const activeTodo = todos.find(todo => todo.id === activeId)
       const overTodo = todos.find(todo => todo.id === overId)
       
