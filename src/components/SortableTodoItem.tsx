@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Todo } from '@/types/todo'
 import { Priority, Importance } from '@prisma/client'
 
-interface TodoItemProps {
+interface SortableTodoItemProps {
   todo: Todo
   onUpdate: (id: string, updates: Partial<Todo>) => void
   onDelete: (id: string) => void
+  isInKanban?: boolean
 }
 
 const priorityColors = {
@@ -22,14 +25,33 @@ const importanceColors = {
   HIGH: 'bg-red-100'
 }
 
-export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
+export default function SortableTodoItem({ todo, onUpdate, onDelete, isInKanban = false }: SortableTodoItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
   const [editDescription, setEditDescription] = useState(todo.description)
   const [editPriority, setEditPriority] = useState<Priority>(todo.priority)
   const [editImportance, setEditImportance] = useState<Importance>(todo.importance)
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: todo.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   const handleToggleComplete = () => {
+    if (isInKanban) {
+      // In kanban mode, don't use checkbox - status is managed by drag and drop
+      return
+    }
     onUpdate(todo.id, { completed: !todo.completed })
   }
 
@@ -53,7 +75,11 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
 
   if (isEditing) {
     return (
-      <div className="border rounded-lg p-4 bg-white shadow-sm">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="border rounded-lg p-4 bg-white shadow-sm"
+      >
         <div className="space-y-3">
           <input
             type="text"
@@ -109,48 +135,62 @@ export default function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
   }
 
   return (
-    <div className={`border rounded-lg p-4 shadow-sm transition-all ${
-      todo.completed ? 'bg-gray-50 opacity-75' : 'bg-white'
-    } ${importanceColors[todo.importance]}`}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`border rounded-lg p-3 shadow-sm transition-all cursor-grab active:cursor-grabbing ${
+        todo.status === 'DONE' ? 'bg-gray-50 opacity-75' : 'bg-white'
+      } ${importanceColors[todo.importance]} ${isDragging ? 'shadow-lg' : ''} hover:shadow-md`}
+      {...attributes}
+      {...listeners}
+    >
       <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={todo.completed}
-          onChange={handleToggleComplete}
-          className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
+        {!isInKanban && (
+          <input
+            type="checkbox"
+            checked={todo.completed}
+            onChange={handleToggleComplete}
+            className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+        )}
         <div className="flex-1">
           <h3 className={`font-semibold ${
-            todo.completed ? 'line-through text-gray-500' : 'text-gray-900'
+            todo.status === 'DONE' ? 'line-through text-gray-500' : 'text-gray-900'
           }`}>
             {todo.title}
           </h3>
           {todo.description && (
             <p className={`mt-1 text-sm ${
-              todo.completed ? 'line-through text-gray-400' : 'text-gray-600'
+              todo.status === 'DONE' ? 'line-through text-gray-400' : 'text-gray-600'
             }`}>
               {todo.description}
             </p>
           )}
-          <div className="flex gap-3 mt-2">
-            <span className={`text-xs font-medium ${priorityColors[todo.priority]}`}>
+          <div className="flex gap-2 mt-2">
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${priorityColors[todo.priority]} bg-white`}>
               優先度: {todo.priority === 'LOW' ? '低' : todo.priority === 'MEDIUM' ? '中' : '高'}
             </span>
-            <span className={`text-xs font-medium ${priorityColors[todo.importance]}`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${priorityColors[todo.importance]} bg-white`}>
               重要度: {todo.importance === 'LOW' ? '低' : todo.importance === 'MEDIUM' ? '中' : '高'}
             </span>
           </div>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsEditing(true)
+            }}
             className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
-            disabled={todo.completed}
+            disabled={todo.status === 'DONE'}
           >
             編集
           </button>
           <button
-            onClick={() => onDelete(todo.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(todo.id)
+            }}
             className="text-sm text-red-600 hover:text-red-800 transition-colors"
           >
             削除
