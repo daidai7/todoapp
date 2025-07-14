@@ -1,4 +1,4 @@
-import { Priority, Importance } from '@prisma/client'
+import { Priority, Importance, Status } from '@prisma/client'
 
 export interface Todo {
   id: string
@@ -6,7 +6,9 @@ export interface Todo {
   description: string
   priority: Priority
   importance: Importance
+  status: Status
   completed: boolean
+  order: number
   createdAt: Date
   updatedAt: Date
 }
@@ -16,6 +18,7 @@ export interface CreateTodoRequest {
   description?: string
   priority?: Priority
   importance?: Importance
+  status?: Status
 }
 
 export interface UpdateTodoRequest {
@@ -23,5 +26,6 @@ export interface UpdateTodoRequest {
   description?: string
   priority?: Priority
   importance?: Importance
+  status?: Status
   completed?: boolean
 }

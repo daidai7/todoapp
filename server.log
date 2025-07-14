@@ -8,13 +8,36 @@
    - Environments: .env
 
  ✓ Starting...
- ✓ Ready in 671ms
+ ✓ Ready in 733ms
+ ✓ Compiled /api/todos in 351ms
+ GET /api/todos 200 in 686ms
+ POST /api/todos 201 in 48ms
+ ✓ Compiled /api/todos/status in 206ms
+ PATCH /api/todos/status 200 in 230ms
  ○ Compiling / ...
- ✓ Compiled / in 752ms
- HEAD / 200 in 859ms
- ✓ Compiled /api/todos in 207ms
- GET /api/todos 200 in 513ms
- GET / 200 in 63ms
- GET /api/todos 200 in 23ms
- ✓ Compiled /favicon.ico in 172ms
- GET /favicon.ico?favicon.45db1c09.ico 200 in 416ms
+ ✓ Compiled / in 783ms
+ GET / 200 in 860ms
+ GET /api/todos 200 in 33ms
+ ✓ Compiled /favicon.ico in 211ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 461ms
+ PATCH /api/todos/status 200 in 33ms
+ PATCH /api/todos/status 200 in 46ms
+ PATCH /api/todos/status 200 in 35ms
+ PATCH /api/todos/status 200 in 16ms
+ PATCH /api/todos/status 200 in 42ms
+ PATCH /api/todos/status 200 in 33ms
+ ✓ Compiled /api/todos/reorder in 210ms
+ PATCH /api/todos/reorder 200 in 294ms
+ PATCH /api/todos/reorder 200 in 70ms
+ ✓ Compiled in 69ms
+ ✓ Compiled in 84ms
+ ✓ Compiled in 114ms
+ ✓ Compiled in 34ms
+ ✓ Compiled in 40ms
+ ✓ Compiled in 107ms
+ ✓ Compiled in 43ms
+ POST /api/todos 201 in 47ms
+ ✓ Compiled in 79ms
+ ✓ Compiled in 38ms
+ ✓ Compiled in 107ms
+ ✓ Compiled in 47ms

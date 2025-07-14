@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import TodoForm from '@/components/TodoForm'
-import TodoItem from '@/components/TodoItem'
+import KanbanBoard from '@/components/KanbanBoard'
 import { Todo, CreateTodoRequest } from '@/types/todo'
+import { Status } from '@prisma/client'
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([])
@@ -79,6 +80,53 @@ export default function Home() {
     }
   }
 
+  const reorderTodos = async (newTodos: Todo[]) => {
+    // Optimistically update the UI
+    setTodos(newTodos)
+    
+    try {
+      const todoIds = newTodos.map(todo => todo.id)
+      const response = await fetch('/api/todos/reorder', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ todoIds }),
+      })
+      
+      if (response.ok) {
+        const updatedTodos = await response.json()
+        setTodos(updatedTodos)
+      } else {
+        // Revert on error
+        fetchTodos()
+      }
+    } catch (error) {
+      console.error('Failed to reorder todos:', error)
+      // Revert on error
+      fetchTodos()
+    }
+  }
+
+  const changeStatus = async (todoId: string, newStatus: Status, targetPosition?: number) => {
+    try {
+      const response = await fetch('/api/todos/status', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ todoId, status: newStatus, targetPosition }),
+      })
+      
+      if (response.ok) {
+        const updatedTodos = await response.json()
+        setTodos(updatedTodos)
+      }
+    } catch (error) {
+      console.error('Failed to change todo status:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -88,54 +136,45 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Todo App
-          </h1>
-          <p className="text-gray-600">
-            タスクを管理して効率的に作業を進めましょう
-          </p>
-        </header>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <TodoForm onSubmit={createTodo} />
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  タスク一覧
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {todos.filter(todo => !todo.completed).length} / {todos.length} 件
-                </span>
-              </div>
-
-              {todos.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border">
-                  <p className="text-gray-500">まだタスクがありません</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    左のフォームから新しいタスクを追加してください
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {todos.map(todo => (
-                    <TodoItem
-                      key={todo.id}
-                      todo={todo}
-                      onUpdate={updateTodo}
-                      onDelete={deleteTodo}
-                    />
-                  ))}
-                </div>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Header with inline form */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6 bg-white rounded-lg shadow-sm p-6 gap-6">
+          <div className="flex items-center space-x-6 lg:w-1/3">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Todo Kanban Board
+              </h1>
+              <p className="text-sm text-gray-600">
+                タスクをドラッグ&ドロップして進捗を管理
+              </p>
             </div>
           </div>
+          
+          <div className="lg:w-2/3">
+            <TodoForm onSubmit={createTodo} />
+          </div>
+        </div>
+
+        {/* Kanban Board */}
+        <div className="h-[calc(100vh-14rem)]">
+          {todos.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
+              <div className="text-4xl mb-4">🎯</div>
+              <p className="text-gray-500 text-lg">まだタスクがありません</p>
+              <p className="text-sm text-gray-400 mt-1">
+                右上のフォームから新しいタスクを追加してください
+              </p>
+            </div>
+          ) : (
+            <KanbanBoard
+              todos={todos}
+              onUpdate={updateTodo}
+              onDelete={deleteTodo}
+              onStatusChange={changeStatus}
+              onReorder={reorderTodos}
+            />
+          )}
         </div>
       </div>
     </div>

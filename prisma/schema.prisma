@@ -13,7 +13,9 @@ model Todo {
   description String?
   priority    Priority @default(MEDIUM)
   importance  Importance @default(MEDIUM)
+  status      Status   @default(TODO)
   completed   Boolean  @default(false)
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -30,4 +32,10 @@ enum Importance {
   LOW
   MEDIUM
   HIGH
+}
+
+enum Status {
+  TODO
+  DOING
+  DONE
 }
