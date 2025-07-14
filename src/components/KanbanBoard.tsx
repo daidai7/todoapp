@@ -13,12 +13,13 @@ interface KanbanBoardProps {
   onDelete: (id: string) => void
   onStatusChange: (todoId: string, newStatus: Status, targetPosition?: number) => void
   onReorder: (newTodos: Todo[]) => void
+  theme: 'glass' | 'default'
 }
 
 const statusConfig = {
-  TODO: { title: 'Todo', color: 'bg-blue-100 border-blue-200' },
-  DOING: { title: 'Doing', color: 'bg-yellow-100 border-yellow-200' },
-  DONE: { title: 'Done', color: 'bg-green-100 border-green-200' }
+  TODO: { title: 'Todo', color: 'border-blue-400/30' },
+  DOING: { title: 'Doing', color: 'border-yellow-400/30' },
+  DONE: { title: 'Done', color: 'border-green-400/30' }
 }
 
 export default function KanbanBoard({ 
@@ -26,7 +27,8 @@ export default function KanbanBoard({
   onUpdate, 
   onDelete, 
   onStatusChange, 
-  onReorder 
+  onReorder,
+  theme
 }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [draggedTodo, setDraggedTodo] = useState<Todo | null>(null)
@@ -135,6 +137,7 @@ export default function KanbanBoard({
             onUpdate={onUpdate}
             onDelete={onDelete}
             isDraggedOver={activeId !== null && draggedTodo?.status !== status}
+            theme={theme}
           />
         ))}
       </div>
