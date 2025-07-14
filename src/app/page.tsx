@@ -85,21 +85,36 @@ export default function Home() {
     setTodos(newTodos)
     
     try {
-      const todoIds = newTodos.map(todo => todo.id)
-      const response = await fetch('/api/todos/reorder', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ todoIds }),
+      // Find todos that have changed order and send only their IDs in the new order
+      const changedTodos = newTodos.filter(newTodo => {
+        const oldTodo = todos.find(t => t.id === newTodo.id)
+        return oldTodo && oldTodo.order !== newTodo.order
       })
       
-      if (response.ok) {
-        const updatedTodos = await response.json()
-        setTodos(updatedTodos)
-      } else {
-        // Revert on error
-        fetchTodos()
+      if (changedTodos.length > 0) {
+        // Get all todos with the same status as the changed todos and sort by new order
+        const status = changedTodos[0].status
+        const statusTodos = newTodos
+          .filter(todo => todo.status === status)
+          .sort((a, b) => a.order - b.order)
+        
+        const todoIds = statusTodos.map(todo => todo.id)
+        
+        const response = await fetch('/api/todos/reorder', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ todoIds }),
+        })
+        
+        if (response.ok) {
+          const updatedTodos = await response.json()
+          setTodos(updatedTodos)
+        } else {
+          // Revert on error
+          fetchTodos()
+        }
       }
     } catch (error) {
       console.error('Failed to reorder todos:', error)

@@ -75,22 +75,28 @@ export default function KanbanBoard({
       const overTodo = todos.find(todo => todo.id === overId)
       
       if (activeTodo && overTodo && activeTodo.status === overTodo.status) {
-        const statusTodos = todos.filter(todo => todo.status === activeTodo.status)
+        // Get todos in the same status, sorted by current order
+        const statusTodos = todos
+          .filter(todo => todo.status === activeTodo.status)
+          .sort((a, b) => a.order - b.order)
+        
         const oldIndex = statusTodos.findIndex(todo => todo.id === activeId)
         const newIndex = statusTodos.findIndex(todo => todo.id === overId)
         
-        const reorderedTodos = arrayMove(statusTodos, oldIndex, newIndex)
-        
-        // Update the main todos array
-        const newTodos = todos.map(todo => {
-          if (todo.status === activeTodo.status) {
-            const newOrder = reorderedTodos.findIndex(t => t.id === todo.id)
-            return { ...todo, order: newOrder }
-          }
-          return todo
-        })
-        
-        onReorder(newTodos)
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+          const reorderedStatusTodos = arrayMove(statusTodos, oldIndex, newIndex)
+          
+          // Create the complete updated todos array
+          const newTodos = todos.map(todo => {
+            if (todo.status === activeTodo.status) {
+              const newOrder = reorderedStatusTodos.findIndex(t => t.id === todo.id)
+              return { ...todo, order: newOrder }
+            }
+            return todo
+          })
+          
+          onReorder(newTodos)
+        }
       }
     }
   }
