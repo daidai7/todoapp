@@ -6,7 +6,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { todoIds }: { todoIds: string[] } = body
 
-    // Update order for all todos based on the new order
+    // Update order for the provided todos
     const updatePromises = todoIds.map((id, index) =>
       prisma.todo.update({
         where: { id },
@@ -16,11 +16,12 @@ export async function PATCH(request: NextRequest) {
 
     await Promise.all(updatePromises)
 
-    // Return updated todos in the new order
+    // Return all todos in the correct order
     const todos = await prisma.todo.findMany({
       orderBy: [
         { status: 'asc' },
-        { order: 'asc' }
+        { order: 'asc' },
+        { createdAt: 'desc' }
       ]
     })
 
